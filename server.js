@@ -70,7 +70,7 @@ function jsonError(res, status, code, error, extra = {}) {
   return res.status(status).set('Cache-Control', 'no-store').json({success: false, ok: false, code, error, ...extra});
 }
 function metadataKey(id) { return `${META_PREFIX}${id}.json`; }
-function newUploadId() { return crypto.randomUUID(); }
+function newUploadId() { return crypto.randomBytes(9).toString('base64url'); }
 async function deleteObject(key) {
   if (!key || !storageConfigured()) return;
   try { await getS3().send(new DeleteObjectCommand({Bucket: BUCKET, Key: key})); }
@@ -177,6 +177,40 @@ app.get('/api/config', (_req, res) => res.set('Cache-Control', 'no-store').json(
   uploadRateLimit: UPLOAD_RATE_LIMIT,
   uploadRateWindowMs: UPLOAD_RATE_WINDOW_MS
 }));
+
+async function redirectToIpa(req, res) {
+  const {id, filename} = req.params;
+  if (!/^[A-Za-z0-9_-]{12}$/.test(id) || !filename || !filename.toLowerCase().endsWith('.ipa')) {
+    return jsonError(res, 404, 'NOT_FOUND', 'IPA link not found or expired.');
+  }
+  if (!storageConfigured()) return jsonError(res, 503, 'STORAGE_NOT_CONFIGURED', 'XsignDrive storage is not configured.');
+  try {
+    const result = await getS3().send(new GetObjectCommand({Bucket: BUCKET, Key: metadataKey(id)}));
+    const meta = JSON.parse(await result.Body.transformToString());
+    const expectedFilename = String(meta.filename || '').replace(/\.ipa$/i, '.ipa');
+    if (!meta.key || !meta.filename || filename !== expectedFilename) {
+      return jsonError(res, 404, 'NOT_FOUND', 'IPA link not found or expired.');
+    }
+    const expiresAtMs = Date.parse(meta.expiresAt);
+    if (!Number.isFinite(expiresAtMs) || expiresAtMs <= Date.now()) {
+      return jsonError(res, 410, 'LINK_EXPIRED', 'This IPA link has expired. Upload the file again to create a new link.');
+    }
+    const remainingSeconds = Math.floor((expiresAtMs - Date.now()) / 1000);
+    const signedUrl = await getSignedUrl(getS3(), new GetObjectCommand({
+      Bucket: BUCKET, Key: meta.key,
+      ResponseContentType: 'application/octet-stream',
+      ResponseContentDisposition: `attachment; filename="${safeHeaderFilename(meta.filename)}"`
+    }), {expiresIn: Math.max(1, Math.min(IPA_URL_TTL_SECONDS, remainingSeconds))});
+    return res.set('Cache-Control', 'no-store').set('Referrer-Policy', 'no-referrer').redirect(302, signedUrl);
+  } catch (error) {
+    if (error?.name === 'NoSuchKey' || error?.$metadata?.httpStatusCode === 404) {
+      return jsonError(res, 404, 'NOT_FOUND', 'IPA link not found or expired.');
+    }
+    console.warn('XsignDrive could not resolve an IPA link:', error?.name || 'storage error');
+    return jsonError(res, 502, 'DOWNLOAD_LINK_FAILED', 'Could not prepare the IPA download right now. Please retry.');
+  }
+}
+app.get('/d/:id/:filename', redirectToIpa);
 app.get('/', (_req, res) => res.sendFile(path.join(process.cwd(), 'public', 'index.html')));
 
 app.post('/api/uploads', uploadLimiter, (req, res, next) => {
@@ -197,11 +231,9 @@ app.post('/api/uploads', uploadLimiter, (req, res, next) => {
         Bucket: BUCKET, Key: metadataKey(file.id), Body: JSON.stringify(meta),
         ContentType: 'application/json; charset=utf-8', CacheControl: 'no-store'
       }));
-      const ipaUrl = await getSignedUrl(getS3(), new GetObjectCommand({
-        Bucket: BUCKET, Key: file.key,
-        ResponseContentType: 'application/octet-stream',
-        ResponseContentDisposition: `attachment; filename="${safeHeaderFilename(file.filename)}"`
-      }), {expiresIn: IPA_URL_TTL_SECONDS});
+      const publicBase = (process.env.PUBLIC_BASE_URL || `${req.protocol}://${req.get('host')}`).replace(/\/+$/, '');
+      const linkFilename = file.filename.replace(/\.ipa$/i, '.ipa');
+      const ipaUrl = `${publicBase}/d/${file.id}/${encodeURIComponent(linkFilename)}`;
       return res.status(201).set('Cache-Control', 'no-store').json({
         success: true, ok: true, id: file.id, fileName: file.filename, fileSize: file.size,
         fileSizeFormatted: formatBytes(file.size), uploadedAt: meta.createdAt,

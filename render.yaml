@@ -17,6 +17,8 @@ services:
         value: auto
       - key: S3_BUCKET
         value: xsigner
+      - key: PUBLIC_BASE_URL
+        value: https://xsigndrive.onrender.com
       - key: MAX_IPA_BYTES
         value: "4294967296"
       - key: IPA_URL_TTL_SECONDS

@@ -1,13 +1,13 @@
 # XsignDrive
 
-XsignDrive is a small Node.js upload site that lets users upload `.ipa` packages and get an expiring HTTPS URL to use as `ipaUrl` with the xsigner IPA signing API. It streams file bytes to the existing private Tigris bucket; it does not buffer multi-gigabyte files in RAM or store upload data on the web service's local filesystem.
+XsignDrive is a small Node.js upload site that lets users upload `.ipa` packages and get a short, filename-based HTTPS URL ending in `.ipa` to use as `ipaUrl` with the xsigner IPA signing API. It streams file bytes to the existing private Tigris bucket; it does not buffer multi-gigabyte files in RAM or store upload data on the web service's local filesystem.
 
 ## Features
 
 - Xsigner visual palette (`#135de8`, `#0b45ba`, `#f5f8fd`) and the supplied site icon for favicon, Apple touch icon, and social preview.
 - Drag/drop and file picker, one `.ipa` at a time, with real browser upload progress.
 - Server-streamed multipart upload to the existing private Tigris bucket `xsigner` under the `xsigndrive/` prefix.
-- Presigned HTTPS GET link suitable for xsigner's `ipaUrl`, default 24-hour expiry.
+- Short public HTTPS URL containing the original file name and ending in `.ipa`; it redirects to an expiring, signed Tigris download URL when accessed.
 - Metadata stored under `xsigndrive-meta/` in the same bucket; expired uploaded IPAs are removed by a periodic cleanup sweep.
 - 4 GiB default upload size limit, rate limiting, security headers, JSON API errors, and `/healthz` for Render.
 
@@ -31,14 +31,14 @@ Success response example:
   "uploadedAt": "<ISO timestamp>",
   "expiresAt": "<ISO timestamp>",
   "urlTtlSeconds": 86400,
-  "ipaUrl": "https://<presigned-tigris-url>",
-  "url": "https://<presigned-tigris-url>"
+  "ipaUrl": "https://xsigndrive.onrender.com/d/<short-id>/MyApp.ipa",
+  "url": "https://xsigndrive.onrender.com/d/<short-id>/MyApp.ipa"
 }
 ```
 
 Upload failure responses use JSON `{ "success": false, "ok": false, "code": "...", "error": "..." }`. Common status codes are 400 (wrong/missing field or invalid extension), 413 (file too large), 429 (upload rate limit), 502 (Tigris upload/finalization problem), and 503 (storage configuration missing).
 
-The returned link is a bearer URL: anyone who possesses the entire URL can download the IPA until it expires. Do not post private application links publicly. The expiry cleanup runs every 15 minutes by default; link access expires at the signed URL deadline even if deletion waits until the next sweep.
+The returned short URL is a bearer link: anyone who possesses it can download the IPA until it expires. It includes the sanitized original filename and ends in `.ipa`; requests redirect to a freshly signed Tigris URL that expires no later than the upload's expiry. Do not post private application links publicly. The expiry cleanup runs every 15 minutes by default.
 
 ## Deploy to Render
 
@@ -65,7 +65,8 @@ Tigris does not share environment variables between Render services automaticall
 | `AWS_REGION` | `auto` | Tigris signing region |
 | `S3_BUCKET` | `xsigner` in Render config | Existing Tigris bucket |
 | `MAX_IPA_BYTES` | 4 GiB | Maximum accepted IPA size (range capped at 20 GiB in code) |
-| `IPA_URL_TTL_SECONDS` | 86400 (24 hours) | Presigned URL expiry (60 seconds to 7 days) |
+| `IPA_URL_TTL_SECONDS` | 86400 (24 hours) | Short-link and underlying signed download lifetime (60 seconds to 7 days) |
+| `PUBLIC_BASE_URL` | `https://xsigndrive.onrender.com` in Render | Base URL used to generate public short links |
 | `UPLOAD_RATE_LIMIT` | 5 | Upload attempts per IP per window |
 | `UPLOAD_RATE_WINDOW_MS` | 900000 | Rate limit window (15 minutes) |
 | `PART_SIZE_BYTES` | 32 MiB | Tigris multipart part size |
