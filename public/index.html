@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#135de8">
+  <meta name="description" content="Upload an iOS IPA and get a private, expiring HTTPS URL ready for xsigner signing.">
+  <meta property="og:title" content="XsignDrive — IPA hosting for xsigner">
+  <meta property="og:description" content="Upload an IPA and copy a temporary HTTPS link for xsigner.">
+  <meta property="og:image" content="https://i.ibb.co/bjtCzbR7/B7-E4384-A-C57-F-42-FF-9-D7-F-373-BB5-E16507.png">
+  <link rel="icon" type="image/png" href="https://i.ibb.co/bjtCzbR7/B7-E4384-A-C57-F-42-FF-9-D7-F-373-BB5-E16507.png">
+  <link rel="shortcut icon" type="image/png" href="https://i.ibb.co/bjtCzbR7/B7-E4384-A-C57-F-42-FF-9-D7-F-373-BB5-E16507.png">
+  <link rel="apple-touch-icon" href="https://i.ibb.co/bjtCzbR7/B7-E4384-A-C57-F-42-FF-9-D7-F-373-BB5-E16507.png">
+  <link rel="stylesheet" href="/styles.css">
+  <title>XsignDrive — IPA hosting for xsigner</title>
+  <script defer src="/app.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="XsignDrive home">
+        <span class="brand-mark"><img class="brand-icon" src="https://i.ibb.co/bjtCzbR7/B7-E4384-A-C57-F-42-FF-9-D7-F-373-BB5-E16507.png" alt="XsignDrive icon"><span class="brand-fallback" hidden>XD</span></span>
+        <span class="brand-copy"><span class="brand-name">XsignDrive</span><span class="brand-sub">IPA hosting for xsigner</span></span>
+      </a>
+      <span class="status-pill"><span class="status-dot"></span><span>Tigris storage</span></span>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="eyebrow">UPLOAD · COPY · SIGN</div>
+        <h1>Your IPA, <span>ready to link.</span></h1>
+        <p>Upload an iOS app package and get a temporary HTTPS URL. Paste that link into xsigner’s <code>ipaUrl</code> field and let the signing API handle the rest.</p>
+      </section>
+
+      <section class="workspace" aria-label="IPA uploader">
+        <div class="main-column">
+          <section class="panel upload-panel">
+            <div class="section-head"><div><div class="step-label">STEP 01</div><h2>Upload an IPA file</h2></div><span class="file-chip">.IPA ONLY</span></div>
+            <input id="ipa-input" type="file" accept=".ipa,application/octet-stream" hidden>
+            <button class="drop-zone" id="drop-zone" type="button" aria-describedby="upload-hint">
+              <span class="upload-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 15.5v3A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5v-3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="drop-title" id="drop-title">Drop your .ipa file here</span>
+              <span class="drop-subtitle">or click to browse your device</span>
+              <span class="browse-button">Choose IPA</span>
+            </button>
+            <div class="selected-file" id="selected-file" hidden>
+              <span class="file-badge">IPA</span><span class="selected-details"><strong id="selected-name"></strong><small id="selected-size"></small></span><button class="icon-button" id="remove-file" type="button" aria-label="Remove selected file">×</button>
+            </div>
+            <p class="upload-hint" id="upload-hint">Maximum file size: <strong id="max-size">4 GB</strong>. Upload streams directly to private Tigris storage.</p>
+            <div class="upload-progress" id="upload-progress" hidden aria-live="polite">
+              <div class="progress-top"><span id="progress-label">Uploading to Tigris…</span><strong id="progress-percent">0%</strong></div>
+              <div class="progress-track"><div class="progress-bar" id="progress-bar"></div></div>
+              <div class="progress-bottom"><span id="progress-bytes">Preparing upload</span><span id="progress-state">Live progress</span></div>
+            </div>
+            <div class="error-message" id="error-message" role="alert" hidden></div>
+            <button class="primary-button" id="upload-button" type="button" disabled><span id="upload-button-label">Choose an IPA to begin</span><span aria-hidden="true">→</span></button>
+            <p class="privacy-note"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3.5 19 6v5.7c0 4.2-2.8 7-7 8.8-4.2-1.8-7-4.6-7-8.8V6l7-2.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Your file is stored privately. The generated URL is a bearer link: anyone who has it can download the IPA until it expires.</span></p>
+          </section>
+
+          <section class="panel result-panel" id="result-panel" hidden aria-live="polite">
+            <div class="result-heading"><span class="success-icon"><svg viewBox="0 0 24 24" fill="none"><path d="m5 12.5 4.2 4.2L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><div class="step-label success-text">UPLOAD COMPLETE</div><h2>Your IPA link is ready</h2></div></div>
+            <p class="result-description">Copy this HTTPS URL and use it as <code>ipaUrl</code> in xsigner. Keep the full URL, including its query string.</p>
+            <label class="field-label" for="ipa-url">Temporary IPA URL</label>
+            <div class="url-row"><input id="ipa-url" type="text" readonly spellcheck="false" autocomplete="off"><button class="copy-button" id="copy-url" type="button">Copy URL</button></div>
+            <div class="result-meta"><span id="result-file"></span><span id="result-expires"></span></div>
+            <div class="usage-box"><div class="usage-title">Use with xsigner</div><code>ipaUrl: "PASTE_THE_URL_ABOVE"</code><p>Submit the URL using <code>POST /sign</code> or <code>POST /api/v1/discord/sign</code>. You still need to upload the P12 certificate and mobileprovision profile separately.</p></div>
+            <button class="secondary-button" id="upload-another" type="button">Upload another IPA</button>
+          </section>
+        </div>
+
+        <aside class="side-column">
+          <section class="side-card how-card"><h2>How it works</h2><div class="how-step"><span>1</span><div><strong>Upload</strong><p>Your IPA streams straight to private object storage.</p></div></div><div class="how-step"><span>2</span><div><strong>Copy the URL</strong><p>A signed HTTPS link is created for a limited time.</p></div></div><div class="how-step"><span>3</span><div><strong>Sign with xsigner</strong><p>Paste the link into the signing website or Discord API.</p></div></div></section>
+          <section class="side-card details-card"><h2>Storage details</h2><div class="detail-row"><span>Storage</span><strong>Tigris S3</strong></div><div class="detail-row"><span>File type</span><strong>.ipa only</strong></div><div class="detail-row"><span>URL lifetime</span><strong id="url-lifetime">24 hours</strong></div><div class="detail-row"><span>Maximum size</span><strong id="max-size-side">4 GB</strong></div><div class="detail-note">Expired uploads are automatically removed by the cleanup worker. Links may stop working at the expiry time shown after upload.</div></section>
+          <a class="xsigner-link" href="https://xsigner.onrender.com" rel="noreferrer"><span class="link-orb">↗</span><span><strong>Open xsigner</strong><small>Send your IPA URL to the signer</small></span><span class="link-arrow">→</span></a>
+        </aside>
+      </section>
+    </main>
+    <footer><span>© <span id="year"></span> XsignDrive</span><span>Built for the xsigner workflow</span></footer>
+  </div>
+  <noscript><div class="noscript">JavaScript is required to upload files and create a link.</div></noscript>
+</body>
+</html>
