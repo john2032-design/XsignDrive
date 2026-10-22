@@ -4,3 +4,52 @@
 @media(max-width:780px){.workspace{grid-template-columns:1fr}.side-column{grid-template-columns:repeat(2,minmax(0,1fr))}.xsigner-link{grid-column:1/-1}.hero{padding:37px 0 25px}.drop-zone{min-height:220px}}
 @media(max-width:520px){.shell{width:min(100% - 22px,1010px)}.topbar{height:72px}.brand-icon,.brand-mark,.brand-fallback{width:39px;height:39px}.brand-name{font-size:17px}.brand-sub{font-size:10px}.status-pill{font-size:10px;padding:7px 9px}.hero h1{font-size:36px}.hero p{font-size:12px}.panel{padding:16px;border-radius:17px}.side-column{grid-template-columns:1fr}.xsigner-link{grid-column:auto}.drop-zone{padding:18px;min-height:210px}.url-row{flex-direction:column}.copy-button{min-height:42px}.result-meta{flex-direction:column;gap:4px}footer{font-size:9px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Responsive fit and overflow safeguards for long filenames and URLs. */
+html{overflow-x:clip}
+body{min-width:320px}
+img,svg{max-width:100%}
+button,input{min-width:0}
+.brand-copy,.workspace,.main-column,.side-column,.panel,.side-card,.result-panel,.upload-panel{min-width:0}
+.brand-sub,.drop-title,.selected-details strong,.result-meta span,.usage-box code,.xsigner-link small,footer span{overflow-wrap:anywhere;word-break:break-word}
+.url-row input{width:100%;text-overflow:ellipsis}
+.result-meta{min-width:0}
+@media(min-width:761px) and (max-width:980px){
+  .workspace{grid-template-columns:minmax(0,1fr) 270px;gap:14px}
+  .panel{padding:20px}
+  .side-card{padding:17px}
+}
+@media(max-width:760px){
+  .shell{width:calc(100% - 28px)}
+  .workspace{grid-template-columns:minmax(0,1fr);gap:14px}
+  .side-column{grid-template-columns:minmax(0,1fr)}
+  .xsigner-link{grid-column:auto}
+  .hero{padding-top:32px}
+  .panel,.side-card{border-radius:17px}
+}
+@media(max-width:520px){
+  .shell{width:calc(100% - 22px)}
+  .topbar{gap:8px}
+  .brand{gap:9px}
+  .status-pill{gap:6px;padding:7px 8px;font-size:9px}
+  .hero h1{font-size:clamp(30px,9vw,36px);overflow-wrap:anywhere}
+  .hero p{font-size:12px;line-height:1.7}
+  .section-head{align-items:flex-start}
+  .file-chip{flex-shrink:0}
+  .drop-zone{width:100%;padding:16px;min-height:190px}
+  .drop-title{max-width:100%;font-size:14px}
+  .progress-top,.progress-bottom{gap:8px}
+  .progress-bottom{font-size:9px;overflow-wrap:anywhere}
+  .url-row{flex-direction:column}
+  .copy-button{min-height:44px}
+  .result-meta{flex-direction:column;gap:5px}
+  footer{flex-wrap:wrap;align-items:flex-start;gap:8px 16px}
+}
+@media(max-width:360px){
+  .brand-icon,.brand-mark,.brand-fallback{width:34px;height:34px}
+  .brand-name{font-size:15px}
+  .brand-sub{font-size:9px}
+  .status-pill{padding:6px;font-size:8px}
+  .panel{padding:13px}
+  .step-label{font-size:9px}
+}

@@ -59,7 +59,7 @@
 
           <section class="panel result-panel" id="result-panel" hidden aria-live="polite">
             <div class="result-heading"><span class="success-icon"><svg viewBox="0 0 24 24" fill="none"><path d="m5 12.5 4.2 4.2L19 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><div class="step-label success-text">UPLOAD COMPLETE</div><h2>Your IPA link is ready</h2></div></div>
-            <p class="result-description">Copy this HTTPS URL and use it as <code>ipaUrl</code> in xsigner. Keep the full URL, including its query string.</p>
+            <p class="result-description">Copy this HTTPS URL and use it as <code>ipaUrl</code> in xsigner. The short URL includes the file name and ends with .ipa.</p>
             <label class="field-label" for="ipa-url">Temporary IPA URL</label>
             <div class="url-row"><input id="ipa-url" type="text" readonly spellcheck="false" autocomplete="off"><button class="copy-button" id="copy-url" type="button">Copy URL</button></div>
             <div class="result-meta"><span id="result-file"></span><span id="result-expires"></span></div>
@@ -69,9 +69,9 @@
         </div>
 
         <aside class="side-column">
-          <section class="side-card how-card"><h2>How it works</h2><div class="how-step"><span>1</span><div><strong>Upload</strong><p>Your IPA streams straight to private object storage.</p></div></div><div class="how-step"><span>2</span><div><strong>Copy the URL</strong><p>A signed HTTPS link is created for a limited time.</p></div></div><div class="how-step"><span>3</span><div><strong>Sign with xsigner</strong><p>Paste the link into the signing website or Discord API.</p></div></div></section>
+          <section class="side-card how-card"><h2>How it works</h2><div class="how-step"><span>1</span><div><strong>Upload</strong><p>Your IPA streams straight to private object storage.</p></div></div><div class="how-step"><span>2</span><div><strong>Copy the URL</strong><p>Get a short, file-named URL that ends in .ipa.</p></div></div><div class="how-step"><span>3</span><div><strong>Sign with xsigner</strong><p>Paste the link into the signing website or Discord Bot</p></div></div></section>
           <section class="side-card details-card"><h2>Storage details</h2><div class="detail-row"><span>Storage</span><strong>Tigris S3</strong></div><div class="detail-row"><span>File type</span><strong>.ipa only</strong></div><div class="detail-row"><span>URL lifetime</span><strong id="url-lifetime">24 hours</strong></div><div class="detail-row"><span>Maximum size</span><strong id="max-size-side">4 GB</strong></div><div class="detail-note">Expired uploads are automatically removed by the cleanup worker. Links may stop working at the expiry time shown after upload.</div></section>
-          <a class="xsigner-link" href="https://xsigner.onrender.com" rel="noreferrer"><span class="link-orb">↗</span><span><strong>Open xsigner</strong><small>Send your IPA URL to the signer</small></span><span class="link-arrow">→</span></a>
+          <a class="xsigner-link" href="https://xsigner-au5dqbl8.manus.space/" target="_blank" rel="noreferrer"><span class="link-orb">↗</span><span><strong>Open xsigner</strong><small>Send your IPA URL to the signer</small></span><span class="link-arrow">→</span></a>
         </aside>
       </section>
     </main>
