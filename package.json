@@ -1,0 +1,21 @@
+{
+  "name": "xsigndrive",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check public/app.js && node --check scripts/verify-project.mjs && node scripts/verify-project.mjs",
+    "test": "npm run check"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.850.0",
+    "@aws-sdk/lib-storage": "^3.850.0",
+    "@aws-sdk/s3-request-presigner": "^3.850.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "helmet": "^8.1.0",
+    "multer": "^2.0.2"
+  }
+}
